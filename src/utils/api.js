@@ -1,10 +1,10 @@
 import axios from 'axios';
 
 export default axios.create({
-    baseURL: `https://apigs.solux.sn/api/`
+    baseURL: `http://localhost:8000/api/`
 });
 
-export const url = 'https://apigs.solux.sn/';
+export const url = 'http://localhost:8000/';
 
 /* Serveur distant pour test 
     https://apigs.solux.sn/api/

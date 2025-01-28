@@ -39,6 +39,7 @@ import { isEmptyArray } from 'formik';
 import { useEffect } from 'react';
 import AuthUser from 'views/pages/authentication/authentication3/AuthUser';
 import { color, display } from '@mui/system';
+import { set } from 'date-fns';
 
 const ReadArticle = () => {
     const { place, id } = useParams();
@@ -59,11 +60,25 @@ const ReadArticle = () => {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [spinner, setSpinner] = useState(true);
+    const [categories, setCategories] = useState([]);
     const navigate = useNavigate();
+    const [backupArticles, setbackupArticles] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+
+    const getUniqueCategories = (artcls) => {
+        const categoriesSet = new Set();
+        artcls.forEach(article => {
+            if (article.categorie) {
+                categoriesSet.add(article.categorie);
+            }
+        });
+        return Array.from(categoriesSet);
+    };
 
     useEffect(() => {
-        try {
-            async function getArticles() {
+
+        async function getArticles() {
+            try {
                 var response;
                 if (user.profil === 'Caissier') {
                     response = await API.post('articles-boutique', {
@@ -97,19 +112,24 @@ const ReadArticle = () => {
                 }
                 const { data, status } = response.data;
                 setArticles(data);
+                setbackupArticles(data);
+                setCategories(getUniqueCategories(data));
+                setSpinner(false);
+
+            } catch (error) {
+                console.log(error);
             }
-            getArticles();
-            setSpinner(false);
-        } catch (error) {
-            console.log(error);
         }
+        getArticles();
     }, [id, place, user.affectation, user.profil]);
+
     useEffect(() => {
         try {
             async function getDepot() {
                 const response = await API.get(`depot`);
                 const { data, status } = response.data;
                 setDepots(data);
+                console.log(data);
             }
             async function getLocalData() {
                 if (user.profil === 'Admin') {
@@ -152,6 +172,14 @@ const ReadArticle = () => {
         } catch (error) {
             console.log(error);
         }
+    }
+
+
+    function filterByCategory(category) {
+        setSelectedCategory(category);
+        const filtered = backupArticles.filter(article => article.categorie === category);
+        console.log(filtered);
+        setArticles(filtered);
     }
 
     const handleChangeDialog = () => {
@@ -263,7 +291,33 @@ const ReadArticle = () => {
 
             {!isEmptyArray(articles) ? (
                 <TableContainer component={Paper}>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', margin: '10px', gap: '10px' }}>
+                        {categories.map((category, index) => (
+                            <Chip
+                                label={category}
+                                key={index}
+                                sx={{
+                                    color: selectedCategory === category ? 'yellow' : 'black',
+                                    '&:hover': {
+                                        backgroundColor: 'primary',
+                                        color: 'white',
+                                        borderColor: 'primary',
+
+                                    },
+                                    fontWeight: 900,
+                                    fontSize: '0.7rem',
+                                }}
+                                color="primary"
+                                onClick={() => {
+                                    filterByCategory(category);
+                                }}
+                                deleteIcon={<DeleteIcon />}
+                            />))}
+
+                    </Box>
+
                     <Table sx={{ minWidth: 650 }} aria-label="simple table">
+
                         <TableHead>
                             <TableRow>
                                 <TableCell>Nom Article</TableCell>
@@ -278,7 +332,7 @@ const ReadArticle = () => {
                         </TableHead>
                         <TableBody>
                             {articles?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((depot) => (
-                                <TableRow key={depot.id + depot.reference} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                <TableRow key={depot.id + depot.reference + depot.code} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                                     <TableCell component="th" scope="row">
                                         {depot.nom_article}
                                     </TableCell>

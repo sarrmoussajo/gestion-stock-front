@@ -128,7 +128,7 @@ const PopularCard = ({ isLoading }) => {
                                                         <Grid container alignItems="center" justifyContent="space-between">
                                                             <Grid item>
                                                                 <Typography variant="subtitle1" color="inherit">
-                                                                    {article.quantite}
+                                                                    {article.quantite_depot} {/* A voir pour les autres users */}
                                                                 </Typography>
                                                             </Grid>
                                                         </Grid>
