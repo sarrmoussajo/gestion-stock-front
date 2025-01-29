@@ -40,6 +40,7 @@ import { useEffect } from 'react';
 import AuthUser from 'views/pages/authentication/authentication3/AuthUser';
 import { color, display } from '@mui/system';
 import { set } from 'date-fns';
+import { de } from 'date-fns/locale';
 
 const ReadArticle = () => {
     const { place, id } = useParams();
@@ -52,7 +53,8 @@ const ReadArticle = () => {
     const [open, setOpen] = useState(false);
     const [openReturn, setOpenReturn] = useState(false);
     const [errors, setErrors] = useState({});
-    const [index, setIndex] = useState();
+    const [indexArticle, setindexArticle] = useState();
+    const [indexDepot, setindexDepot] = useState();
     const [articles, setArticles] = useState([]);
     const [message, setMessage] = useState(alert);
     const { user } = AuthUser();
@@ -166,9 +168,32 @@ const ReadArticle = () => {
                 const newDepotList = articles.filter((depot) => {
                     return depot.id !== index;
                 });
+                setbackupArticles(newDepotList);
                 setArticles(newDepotList);
             }
             deleteDepot();
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    function handleDeleteDepotArticle() {
+        setOpen(!open);
+        try {
+            async function deleteDepotArticle() {
+                const response = await API.delete(`depot/article/${indexDepot}/${indexArticle}`);
+                const { message, status } = response.data;
+                console.log(response.data);
+                setMessage(message);
+                if (status === 'success') {
+                    const newDepotList = backupArticles.filter((article) => {
+                        return article.article_id !== indexArticle;
+                    });
+                    setbackupArticles(newDepotList);
+                    setArticles(newDepotList);
+                }
+            }
+            deleteDepotArticle();
         } catch (error) {
             console.log(error);
         }
@@ -284,7 +309,7 @@ const ReadArticle = () => {
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={() => setOpen(false)}>Annuler</Button>
-                        <Button onClick={() => handleDelete()}>Confirmer</Button>
+                        <Button onClick={() => handleDeleteDepotArticle()}>Confirmer</Button>
                     </DialogActions>
                 </Dialog>
             ) : null}
@@ -297,12 +322,14 @@ const ReadArticle = () => {
                                 label={category}
                                 key={index}
                                 sx={{
-                                    color: selectedCategory === category ? 'yellow' : 'black',
+                                    color: selectedCategory === category ? "#F8E000" : '#00A651',
+                                    backgroundColor: selectedCategory === category ? "#00A651" : "white",
+                                    border: selectedCategory === category ? "1px solid white" : "1px solid #00A651",
                                     '&:hover': {
-                                        backgroundColor: 'primary',
-                                        color: 'white',
-                                        borderColor: 'primary',
-
+                                        backgroundColor: '#F8E000',
+                                        color: "#00A651",
+                                        borderColor: "white",
+                                        border: '1px solid white'
                                     },
                                     fontWeight: 900,
                                     fontSize: '0.7rem',
@@ -327,7 +354,7 @@ const ReadArticle = () => {
                                 <TableCell>Quantité</TableCell>
                                 <TableCell>Marque</TableCell>
                                 <TableCell>Prix</TableCell>
-                                {user.profil !== 'Admin' && <TableCell>Action</TableCell>}
+                                {user.profil !== 'Admin' && <TableCell align='center'>Action</TableCell>}
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -386,7 +413,11 @@ const ReadArticle = () => {
                                                 )}
                                             </TableCell>
                                             {user.profil !== 'Admin' && (
-                                                <TableCell>
+                                                <TableCell sx={{
+                                                    display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: '5px',
+                                                    flexWrap: 'wrap',
+                                                    alignContent: 'center',
+                                                }}>
                                                     <Chip
                                                         label="Modifier"
                                                         component="a"
@@ -399,15 +430,17 @@ const ReadArticle = () => {
                                                         }}
                                                     />
                                                     &nbsp;&nbsp;
-                                                    {/* <Link
+                                                    <Link
                                                         onClick={() => {
                                                             setOpen(true);
-                                                            setIndex(depot.id);
+                                                            setindexArticle(depot.article_id);
+                                                            setindexDepot(depot.depot_id);
                                                         }}
+                                                        sx={{ paddingTop: '5px' }}
                                                     >
                                                         <DeleteIcon color="error"></DeleteIcon>
                                                     </Link>
-                                                     */}
+
                                                 </TableCell>
                                             )}
                                         </>
@@ -438,7 +471,7 @@ const ReadArticle = () => {
                             justifyContent: 'center',
                             alignItems: 'center',
                             height: '5vh',
-                            backgroundColor: '#A38CD3',
+                            backgroundColor: '#006838',
                             color: 'white',
                             margin: '15vw 20vw 0vw 20vw',
                             borderRadius: '10px'

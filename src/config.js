@@ -3,7 +3,7 @@ const config = {
     // like '/berry-material-react/react/default'
     basename: '/',
     defaultPath: '/login',
-    fontFamily: `'Roboto', sans-serif`,
+    fontFamily: `'Montserrat', sans-serif`,
     borderRadius: 12
 };
 

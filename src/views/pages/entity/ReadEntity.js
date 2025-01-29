@@ -179,7 +179,7 @@ const ReadEntity = () => {
                             justifyContent: 'center',
                             alignItems: 'center',
                             height: '5vh',
-                            backgroundColor: '#A38CD3',
+                            backgroundColor: '#006838',
                             color: 'white',
                             margin: '15vw 20vw 0vw 20vw',
                             borderRadius: '10px'
