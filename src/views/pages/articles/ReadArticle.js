@@ -41,11 +41,13 @@ import AuthUser from 'views/pages/authentication/authentication3/AuthUser';
 import { color, display } from '@mui/system';
 import { set } from 'date-fns';
 import { de } from 'date-fns/locale';
+import api from 'utils/api';
 
 const ReadArticle = () => {
     const { place, id } = useParams();
     const location = useLocation();
     const alert = location.state ? location.state.alert : '';
+    const cat = location.state ? location.state.cat : null;
     const [depots, setDepots] = useState([]);
     const [itemLocal, setItemLocal] = useState();
     const [depot, setDepot] = useState();
@@ -65,7 +67,7 @@ const ReadArticle = () => {
     const [categories, setCategories] = useState([]);
     const navigate = useNavigate();
     const [backupArticles, setbackupArticles] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState(cat);
 
     const getUniqueCategories = (artcls) => {
         const categoriesSet = new Set();
@@ -77,53 +79,65 @@ const ReadArticle = () => {
         return Array.from(categoriesSet);
     };
 
-    useEffect(() => {
-
-        async function getArticles() {
-            try {
-                var response;
-                if (user.profil === 'Caissier') {
+    async function getArticles() {
+        try {
+            var response;
+            if (user.profil === 'Caissier') {
+                response = await API.post('articles-boutique', {
+                    boutique_id: user.affectation
+                });
+                setProfil('Caissier');
+            } else if (user.profil === 'Gerant') {
+                if (place === 'boutique') {
                     response = await API.post('articles-boutique', {
-                        boutique_id: user.affectation
+                        boutique_id: id
                     });
                     setProfil('Caissier');
-                } else if (user.profil === 'Gerant') {
-                    if (place === 'boutique') {
-                        response = await API.post('articles-boutique', {
-                            boutique_id: id
-                        });
-                        setProfil('Caissier');
-                    } else {
-                        response = await API.post('articles-depot', {
-                            depot_id: user.affectation
-                        });
-                        setProfil('Gerant');
-                    }
-                } else if (user.profil === 'Admin') {
-                    if (place === 'boutique') {
-                        response = await API.post('articles-boutique', {
-                            boutique_id: id
-                        });
-                        setProfil('Caissier');
-                    } else if (place === 'depot') {
-                        response = await API.post('articles-depot', {
-                            depot_id: id
-                        });
-                        setProfil('Gerant');
-                    }
+                } else {
+                    response = await API.post('articles-depot', {
+                        depot_id: user.affectation
+                    });
+                    setProfil('Gerant');
                 }
-                const { data, status } = response.data;
-                setArticles(data);
-                setbackupArticles(data);
-                setCategories(getUniqueCategories(data));
-                setSpinner(false);
-
-            } catch (error) {
-                console.log(error);
+            } else if (user.profil === 'Admin') {
+                if (place === 'boutique') {
+                    response = await API.post('articles-boutique', {
+                        boutique_id: id
+                    });
+                    setProfil('Caissier');
+                } else if (place === 'depot') {
+                    response = await API.post('articles-depot', {
+                        depot_id: id
+                    });
+                    setProfil('Gerant');
+                }
             }
+            const { data, status } = response.data;
+            setArticles(data);
+            setbackupArticles(data);
+            setCategories(getUniqueCategories(data));
+            setSpinner(false);
+
+
+        } catch (error) {
+            console.log(error);
         }
-        getArticles();
+    }
+
+    useEffect(() => {
+        const fetchData = async () => {
+            await getArticles();
+
+        };
+
+        fetchData(); // Appeler la fonction async
     }, [id, place, user.affectation, user.profil]);
+
+    useEffect(() => {
+        if (cat) {
+            filterByCategory(cat);
+        }
+    }, [cat, backupArticles]);
 
     useEffect(() => {
         try {
@@ -177,22 +191,30 @@ const ReadArticle = () => {
         }
     }
 
+    async function deleteDepotArticle() {
+        try {
+            const response = await API.delete(`depot/article/${indexDepot}/${indexArticle}`);
+            const { message, status } = response.data;
+            console.log(response.data);
+            setMessage(message);
+            if (status === 'success') {
+                const newDepotList = backupArticles.filter((article) => {
+                    return article.article_id !== indexArticle;
+                });
+                setbackupArticles(newDepotList);
+                setArticles(newDepotList);
+            }
+        } catch (error) {
+            console.log(error);
+
+        }
+
+    }
+
     function handleDeleteDepotArticle() {
         setOpen(!open);
         try {
-            async function deleteDepotArticle() {
-                const response = await API.delete(`depot/article/${indexDepot}/${indexArticle}`);
-                const { message, status } = response.data;
-                console.log(response.data);
-                setMessage(message);
-                if (status === 'success') {
-                    const newDepotList = backupArticles.filter((article) => {
-                        return article.article_id !== indexArticle;
-                    });
-                    setbackupArticles(newDepotList);
-                    setArticles(newDepotList);
-                }
-            }
+
             deleteDepotArticle();
         } catch (error) {
             console.log(error);
@@ -203,7 +225,6 @@ const ReadArticle = () => {
     function filterByCategory(category) {
         setSelectedCategory(category);
         const filtered = backupArticles.filter(article => article.categorie === category);
-        console.log(filtered);
         setArticles(filtered);
     }
 
@@ -236,25 +257,31 @@ const ReadArticle = () => {
         }
     };
 
+    const returnArticle = async () => {
+        try {
+            const response = await API.post(`retourner-article`, {
+                article_id: depot.article_id,
+                boutique_id: user.affectation,
+                quantite: formData.quantite,
+                depot_id: formData.nom_depot,
+                user_id: user.id
+            });
+            const { status, message } = response.data;
+            if (status === 'success') {
+                setMessage(message);
+                handleChangeDialog();
+                handleChangeArticleTab();
+            } else {
+                setErrors({ ...errors, message: message });
+            }
+        } catch (error) {
+            console.log(error);
+        }
+
+    };
+
     const handleSubmit = () => {
         try {
-            async function returnArticle() {
-                const response = await API.post(`retourner-article`, {
-                    article_id: depot.article_id,
-                    boutique_id: user.affectation,
-                    quantite: formData.quantite,
-                    depot_id: formData.nom_depot,
-                    user_id: user.id
-                });
-                const { status, message } = response.data;
-                if (status === 'success') {
-                    setMessage(message);
-                    handleChangeDialog();
-                    handleChangeArticleTab();
-                } else {
-                    setErrors({ ...errors, message: message });
-                }
-            }
             returnArticle();
         } catch (error) {
             console.log(error);

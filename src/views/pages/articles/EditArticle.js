@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { Category } from '@mui/icons-material';
 import { Button, FormControl, Grid, Paper, styled, TextField } from '@mui/material';
 import { Box } from '@mui/system';
 import { useEffect } from 'react';
@@ -24,49 +25,61 @@ const EditArticle = () => {
         setEnabled(true);
     }
 
+    async function getArticle() {
+        try {
+            const response = await API.post(`article-depot`, {
+                gerant_id: user.id,
+                depot_id: user.affectation,
+                article_id: id
+            });
+            const { data, status } = response.data;
+
+            setItems(data);
+            setStatus(status);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    async function updateArticle() {
+        try {
+            const response = await API.put(`article`, {
+                gerant_id: user.id,
+                depot_id: user.affectation,
+                article_id: id,
+                nom_article: items.nom_article,
+                quantite: quantite_depot,
+                marque: items.marque,
+                reference: items.reference,
+                prix: items.prix
+            });
+            const { status, errors } = response.data;
+            if (status === 'success') {
+                const { message } = response.data;
+                console.log(items.categorie);
+                return navigate('/depot/article', { state: { alert: message, cat: items.categorie } });
+            } else {
+                const { errors } = response.data;
+                setErrors(errors);
+            }
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+
     useEffect(() => {
         try {
-            async function getArticle() {
-                const response = await API.post(`article-depot`, {
-                    gerant_id: user.id,
-                    depot_id: user.affectation,
-                    article_id: id
-                });
-                const { data, status } = response.data;
-                setItems(data);
-                setStatus(status);
-            }
             getArticle();
         } catch (error) {
             console.log(error);
         }
-    }, [id]);
+    }, [id, user]);
 
     const HandleUpdate = () => {
         try {
-            async function updateArticle() {
-                const response = await API.put(`article`, {
-                    gerant_id: user.id,
-                    depot_id: user.affectation,
-                    article_id: id,
-                    nom_article: items.nom_article,
-                    quantite: quantite_depot,
-                    marque: items.marque,
-                    reference: items.reference,
-                    prix: items.prix
-                });
-                const { status, errors } = response.data;
-                if (status === 'success') {
-                    const { message } = response.data;
-                    return navigate('/depot/article', { state: { alert: message } });
-                } else {
-                    const { errors } = response.data;
-                    setErrors(errors);
-                }
-            }
             updateArticle();
         } catch (error) {
-            console.log(error);
+            console.error("Erreur lors de la mise à jour de l'article :", error);
         }
     };
 

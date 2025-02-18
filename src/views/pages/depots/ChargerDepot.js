@@ -8,7 +8,10 @@ import {
     Chip,
     FormControl,
     Grid,
+    InputLabel,
+    MenuItem,
     Paper,
+    Select,
     styled,
     Table,
     TableBody,
@@ -46,6 +49,7 @@ const ChargerDepot = () => {
     /*const [status, setStatus] = useState(['']);*/
     const [errors, setErrors] = useState({});
     const [isLoading, setLoading] = useState(true);
+    const [itemsCategorie, setItemsCategorie] = useState([]);
     const { user, getToken } = AuthUser();
 
     /* const navigate = useNavigate();*/
@@ -208,19 +212,50 @@ const ChargerDepot = () => {
             console.log(error);
         }
     };
+
+    async function getArticles() {
+        try {
+            const response = await API.get(`articles`);
+            const { data, status } = response.data;
+            setItems(data);
+            //setStatus(status); 
+        } catch (error) {
+            console.log(error);
+
+        }
+
+    }
+
+    async function getCategories() {
+        try {
+            const response = await API.get(`article/category`);
+            const { data, status } = response.data;
+
+            console.log('itemsCategorie', status);
+            setItemsCategorie(data);
+            //setStatus(status); 
+        } catch (error) {
+            console.log(error);
+        }
+
+    }
+
     useEffect(() => {
         try {
-            async function getArticles() {
-                const response = await API.get(`articles`);
-                const { data, status } = response.data;
-                setItems(data);
-                //setStatus(status);
-            }
             getArticles();
         } catch (error) {
             console.log(error);
         }
     }, [addingArticle]);
+
+
+    useEffect(() => {
+        try {
+            getCategories();
+        } catch (error) {
+            console.log(error);
+        }
+    }, []);
 
     const Item = styled(Paper)(({ theme }) => ({
         ...theme.typography.h2,
@@ -251,168 +286,186 @@ const ChargerDepot = () => {
                         <Grid item xs={12} md={4}>
                             <MainCard content={false}>
                                 <CardContent>
-                                    <Grid container spacing={gridSpacing}>
+                                    <Grid container spacing={2} justifyContent="center">
                                         <Grid item xs={12}>
-                                            <Grid sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                                <Grid item>
-                                                    <Box
-                                                        component="form"
-                                                        sx={{
-                                                            '& .MuiTextField-root': { m: 1 }
-                                                        }}
+                                            <Grid item>
+                                                <Box
+                                                    component="form"
+                                                    sx={{
+                                                        '& .MuiTextField-root': { m: 1 },
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        gap: 2 // Espacement uniforme
+                                                    }}
+                                                    fullWidth
+                                                >
+                                                    <FormControl
                                                         fullWidth
                                                     >
-                                                        <FormControl
-                                                            style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
-                                                        >
-                                                            <Autocomplete
-                                                                freeSolo
-                                                                inputValue={article.nom_article || ''}
-                                                                disableClearable
-                                                                id="outlined"
-                                                                options={(items && items.map((option) => option.nom_article)) || []}
-                                                                onChange={(event, value) => {
-                                                                    setArticle({ ...article, ['nom_article']: value });
-                                                                }}
-                                                                renderInput={(params) => (
-                                                                    <TextField
-                                                                        {...params}
-                                                                        label="Nom Article"
-                                                                        name="nom_article"
-                                                                        onChange={handleInputChange}
-                                                                        required
-                                                                        InputProps={{
-                                                                            ...params.InputProps,
-                                                                            type: 'search'
-                                                                        }}
-                                                                    />
-                                                                )}
-                                                            />
-
-                                                            {!openForm ? (
-                                                                <>
-                                                                    <Button
-                                                                        variant="outlined"
-                                                                        sx={{ margin: 1, color: '#673AB7', backgroundColor: '#EDE7F6' }}
-                                                                        onClick={HandleNext}
-                                                                        disabled={article.nom_article === '' ? true : false}
-                                                                    >
-                                                                        Suivant
-                                                                    </Button>
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <TextField
-                                                                        id="outlined"
-                                                                        label="code"
-                                                                        name="code"
-                                                                        value={article.code || ''}
-                                                                        onChange={handleInputChange}
-                                                                        type="text"
-                                                                        required
-                                                                        error={errors.code ? true : false}
-                                                                        helperText={errors.code}
-                                                                    />
-                                                                    <TextField
-                                                                        id="outlined"
-                                                                        label="reference"
-                                                                        name="reference"
-                                                                        value={article.reference || ''}
-                                                                        onChange={handleInputChange}
-                                                                        type="text"
-                                                                        required
-                                                                        error={errorsValidation.reference ? true : false}
-                                                                        helperText={errorsValidation.reference}
-                                                                    />
-                                                                    <TextField
-                                                                        id="outlined"
-                                                                        label="marque"
-                                                                        name="marque"
-                                                                        value={article.marque || ''}
-                                                                        onChange={handleInputChange}
-                                                                        type="text"
-                                                                        required
-                                                                        error={errorsValidation.marque ? true : false}
-                                                                        helperText={errorsValidation.marque}
-                                                                    />
-                                                                    <TextField
-                                                                        id="outlined"
-                                                                        label="type"
-                                                                        name="type"
-                                                                        value={article.type || ''}
-                                                                        onChange={handleInputChange}
-                                                                        type="text"
-                                                                        required
-                                                                        error={errorsValidation.type ? true : false}
-                                                                        helperText={errorsValidation.type}
-                                                                    />
-                                                                    <TextField
-                                                                        id="outlined"
-                                                                        label="Catégorie"
-                                                                        name="categorie"
-                                                                        value={article.categorie || ''}
-                                                                        onChange={handleInputChange}
-                                                                        type="text"
-                                                                        required
-                                                                        error={errorsValidation.type ? true : false}
-                                                                        helperText={errorsValidation.type}
-                                                                    />
-
-                                                                    <TextField
-                                                                        id="outlined"
-                                                                        label="quantité"
-                                                                        name="quantite"
-                                                                        value={article.quantite || ''}
-                                                                        onChange={handleInputChange}
-                                                                        type="number"
-                                                                        required
-                                                                        error={errors.quantite ? true : false}
-                                                                        helperText={errors.quantite}
-                                                                    />
-                                                                    <TextField
-                                                                        id="outlined"
-                                                                        label="prix en CFA"
-                                                                        name="prix"
-                                                                        value={article.prix || ''}
-                                                                        onChange={handleInputChange}
-                                                                        type="number"
-                                                                        required
-                                                                        error={errors.prix ? true : false}
-                                                                        helperText={errors.prix}
-                                                                    />
-                                                                    <Button
-                                                                        variant="outlined"
-                                                                        sx={{ margin: 1, color: '#673AB7', backgroundColor: '#EDE7F6' }}
-                                                                        onClick={HandleAdd}
-                                                                        disabled={article.quantite > 0 ? false : true}
-                                                                    >
-                                                                        Ajouter
-                                                                    </Button>
-                                                                    <Button
-                                                                        variant="outlined"
-                                                                        sx={{ margin: 1, color: '#673AB7', backgroundColor: '#EDE7F6' }}
-                                                                        onClick={() => {
-                                                                            setOpenForm(false);
-                                                                            setArticle({
-                                                                                nom_article: '',
-                                                                                code: '',
-                                                                                id: '',
-                                                                                quantite: 0,
-                                                                                prix: 0
-                                                                            });
-                                                                        }}
-                                                                    >
-                                                                        Annuler
-                                                                    </Button>
-                                                                </>
+                                                        <Autocomplete
+                                                            freeSolo
+                                                            inputValue={article.nom_article || ''}
+                                                            disableClearable
+                                                            id="outlined"
+                                                            options={(items && items.map((option) => option.nom_article)) || []}
+                                                            onChange={(event, value) => {
+                                                                setArticle({ ...article, ['nom_article']: value });
+                                                            }}
+                                                            renderInput={(params) => (
+                                                                <TextField
+                                                                    {...params}
+                                                                    label="Nom Article"
+                                                                    name="nom_article"
+                                                                    onChange={handleInputChange}
+                                                                    required
+                                                                    InputProps={{
+                                                                        ...params.InputProps,
+                                                                        type: 'search'
+                                                                    }}
+                                                                    fullWidth
+                                                                />
                                                             )}
-                                                        </FormControl>
-                                                    </Box>
-                                                </Grid>
+                                                        />
+
+                                                        {!openForm ? (
+                                                            <>
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    sx={{ margin: 1, color: '#673AB7', backgroundColor: '#EDE7F6' }}
+                                                                    onClick={HandleNext}
+                                                                    disabled={article.nom_article === '' ? true : false}
+                                                                >
+                                                                    Suivant
+                                                                </Button>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <TextField
+                                                                    id="outlined"
+                                                                    label="code"
+                                                                    name="code"
+                                                                    value={article.code || ''}
+                                                                    onChange={handleInputChange}
+                                                                    type="text"
+                                                                    required
+                                                                    error={errors.code ? true : false}
+                                                                    helperText={errors.code}
+                                                                    fullWidth
+                                                                />
+                                                                <TextField
+                                                                    id="outlined"
+                                                                    label="reference"
+                                                                    name="reference"
+                                                                    value={article.reference || ''}
+                                                                    onChange={handleInputChange}
+                                                                    type="text"
+                                                                    required
+                                                                    error={errorsValidation.reference ? true : false}
+                                                                    helperText={errorsValidation.reference}
+                                                                    fullWidth
+                                                                />
+                                                                <TextField
+                                                                    id="outlined"
+                                                                    label="marque"
+                                                                    name="marque"
+                                                                    value={article.marque || ''}
+                                                                    onChange={handleInputChange}
+                                                                    type="text"
+                                                                    required
+                                                                    error={errorsValidation.marque ? true : false}
+                                                                    helperText={errorsValidation.marque}
+                                                                    fullWidth
+                                                                />
+                                                                {/* Sélecteur pour le type */}
+                                                                <FormControl fullWidth>
+                                                                    <InputLabel id="demo-multiple-name-label">Type</InputLabel>
+                                                                    <Select labelId="demo-multiple-name-label"
+                                                                        id="demo-multiple-name" name="type" value={article.type || ''} onChange={handleInputChange} required>
+                                                                        <MenuItem value="Luminaires">Luminaires</MenuItem>
+                                                                        <MenuItem value="Appareillages">Appareillages</MenuItem>
+                                                                        <MenuItem value="Solaires">Solaires</MenuItem>
+                                                                    </Select>
+                                                                </FormControl>
+                                                                <Autocomplete
+                                                                    freeSolo
+                                                                    value={article.categorie} // Assurez-vous que article est bien défini
+                                                                    id="outlined"
+                                                                    options={(itemsCategorie || []).map((option) => option.categorie)} // Evite erreurs si itemsCategorie est null
+                                                                    onChange={(event, value) => {
+                                                                        setArticle({ ...article, categorie: value ? article.categorie : '' }); // Mise à jour correcte de l'objet
+                                                                    }}
+                                                                    renderInput={(params) => (
+                                                                        <TextField
+                                                                            {...params}
+                                                                            label="Catégorie"
+                                                                            name="categorie"
+                                                                            onChange={handleInputChange}
+                                                                            required
+                                                                            InputProps={{
+                                                                                ...params.InputProps,
+                                                                                type: 'search'
+                                                                            }}
+                                                                            fullWidth
+                                                                        />
+                                                                    )}
+                                                                />
+                                                                <TextField
+                                                                    id="outlined"
+                                                                    label="quantité"
+                                                                    name="quantite"
+                                                                    value={article.quantite || ''}
+                                                                    onChange={handleInputChange}
+                                                                    type="number"
+                                                                    required
+                                                                    error={errors.quantite ? true : false}
+                                                                    helperText={errors.quantite}
+                                                                    fullWidth
+                                                                />
+                                                                <TextField
+                                                                    id="outlined"
+                                                                    label="prix en CFA"
+                                                                    name="prix"
+                                                                    value={article.prix || ''}
+                                                                    onChange={handleInputChange}
+                                                                    type="number"
+                                                                    required
+                                                                    error={errors.prix ? true : false}
+                                                                    helperText={errors.prix}
+                                                                    fullWidth
+                                                                />
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    sx={{ margin: 1, color: '#673AB7', backgroundColor: '#EDE7F6' }}
+                                                                    onClick={HandleAdd}
+                                                                    disabled={article.quantite > 0 ? false : true}
+                                                                >
+                                                                    Ajouter
+                                                                </Button>
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    sx={{ margin: 1, color: '#673AB7', backgroundColor: '#EDE7F6' }}
+                                                                    onClick={() => {
+                                                                        setOpenForm(false);
+                                                                        setArticle({
+                                                                            nom_article: '',
+                                                                            code: '',
+                                                                            id: '',
+                                                                            quantite: 0,
+                                                                            prix: 0
+                                                                        });
+                                                                    }}
+                                                                >
+                                                                    Annuler
+                                                                </Button>
+                                                            </>
+                                                        )}
+                                                    </FormControl>
+                                                </Box>
                                             </Grid>
                                         </Grid>
-                                        <Grid item xs={12}></Grid>
                                     </Grid>
+                                    <Grid item xs={12}></Grid>
+
                                 </CardContent>
                             </MainCard>
                         </Grid>
@@ -472,9 +525,9 @@ const ChargerDepot = () => {
                                 </Grid>
                             </MainCard>
                         </Grid>
-                    </Grid>
-                </Grid>
-            </Grid>
+                    </Grid >
+                </Grid >
+            </Grid >
         </>
     );
 };
