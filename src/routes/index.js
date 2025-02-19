@@ -10,6 +10,7 @@ import UserRoutes from './UserRoutes';
 import VenteRoutes from './VenteRoutes';
 import DashboardRoutes from './DashboardRoutes';
 import EntityRoutes from './EntityRoutes';
+import DefaultRoutes from './DefaultRoutes';
 
 // ==============================|| ROUTING RENDER ||============================== //
 
@@ -23,6 +24,7 @@ export default function ThemeRoutes() {
         FraisRoutes,
         UserRoutes,
         VenteRoutes,
-        EntityRoutes
+        EntityRoutes,
+        DefaultRoutes
     ]);
 }

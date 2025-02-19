@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import {
     Alert,
+    AlertTitle,
     Autocomplete,
     Button,
     CardActions,
@@ -22,7 +23,7 @@ import {
     Typography
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box } from '@mui/system';
+import { Box, color } from '@mui/system';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { gridSpacing } from 'store/constant';
@@ -37,13 +38,14 @@ import TotalIncomeLightCard from 'views/dashboard/Default/TotalIncomeLightCard';
 import TotalOrderLineChartCard from 'views/dashboard/Default/TotalOrderLineChartCard';
 import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';
 import AuthUser from '../authentication/authentication3/AuthUser';
+import { useNavigate } from "react-router-dom";
 import { set } from 'date-fns';
 
 const ChargerDepot = () => {
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState({ text: '', color: '' });
     const [errorsValidation, seterrorsValidation] = useState({});
     const [items, setItems] = useState();
-    const [article, setArticle] = useState({ nom_article: '', code: '', id: '', quantite: 0, marque: '', reference: '', prix: 0 });
+    const [article, setArticle] = useState({ nom_article: '', code: '', id: '', quantite: 0, marque: '', reference: '', prix: 0, categorie: '' });
     const [addingArticle, setAddingArticle] = useState([]);
     const [openForm, setOpenForm] = useState(false);
     /*const [status, setStatus] = useState(['']);*/
@@ -51,6 +53,7 @@ const ChargerDepot = () => {
     const [isLoading, setLoading] = useState(true);
     const [itemsCategorie, setItemsCategorie] = useState([]);
     const { user, getToken } = AuthUser();
+    const navigate = useNavigate();
 
     /* const navigate = useNavigate();*/
 
@@ -124,6 +127,7 @@ const ChargerDepot = () => {
     }
 
     const HandleAddNewArticle = () => {
+        console.log('article', article);
         const newArticle = article.nom_article;
         const marque = article.marque;
         const reference = article.reference;
@@ -134,6 +138,7 @@ const ChargerDepot = () => {
         const code = article.code;
         try {
             async function storeArticle() {
+
                 const response = await API.post('ajouter-un-article', {
                     nom_article: newArticle,
                     marque: marque,
@@ -181,6 +186,7 @@ const ChargerDepot = () => {
             }
             storeArticle();
         } catch (error) {
+            setMessage({ text: 'Erreur lors de l\'ajout de l\'article', color: 'error' });
             console.log(error);
         }
     };
@@ -200,16 +206,20 @@ const ChargerDepot = () => {
                         setAddingArticle([]);
                         setArticle({ nom_article: '', code: '', id: '', quantite: 0, marque: '', reference: '' });
                         setOpenForm(false);
-                        setMessage(message);
+                        setMessage(({ text: message, color: 'success' }));
                     } else {
                         const { errors } = response.data;
                         setErrors(errors);
+
                     }
                 }
             }
             addArticleDepot();
         } catch (error) {
+
+            setMessage({ text: "Erreur lors de l'ajout de l'article", color: 'error' });
             console.log(error);
+
         }
     };
 
@@ -243,6 +253,7 @@ const ChargerDepot = () => {
     useEffect(() => {
         try {
             getArticles();
+            console.log('user', user);
         } catch (error) {
             console.log(error);
         }
@@ -273,15 +284,17 @@ const ChargerDepot = () => {
             </Grid>
             <Grid container spacing={gridSpacing}>
                 <Grid item xs={12}>
-                    {message !== '' && (
+                    {message.color !== '' && (
                         <Alert
+                            severity={message.color}
                             onClose={() => {
-                                setMessage('');
+                                setMessage({ text: '', color: '' });
                             }}
                         >
-                            {message}
+                            {message.text}
                         </Alert>
                     )}
+
                     <Grid container spacing={gridSpacing}>
                         <Grid item xs={12} md={4}>
                             <MainCard content={false}>
@@ -307,7 +320,7 @@ const ChargerDepot = () => {
                                                             inputValue={article.nom_article || ''}
                                                             disableClearable
                                                             id="outlined"
-                                                            options={(items && items.map((option) => option.nom_article)) || []}
+                                                            options={[...new Set(items?.map((option) => option.nom_article))]}
                                                             onChange={(event, value) => {
                                                                 setArticle({ ...article, ['nom_article']: value });
                                                             }}
@@ -390,9 +403,10 @@ const ChargerDepot = () => {
                                                                     freeSolo
                                                                     value={article.categorie} // Assurez-vous que article est bien défini
                                                                     id="outlined"
-                                                                    options={(itemsCategorie || []).map((option) => option.categorie)} // Evite erreurs si itemsCategorie est null
+
+                                                                    options={[...new Set(itemsCategorie?.map((option) => option.categorie))]} // Evite erreurs si itemsCategorie est null
                                                                     onChange={(event, value) => {
-                                                                        setArticle({ ...article, categorie: value ? article.categorie : '' }); // Mise à jour correcte de l'objet
+                                                                        setArticle({ ...article, ["categorie"]: value }); // Mise à jour correcte de l'objet
                                                                     }}
                                                                     renderInput={(params) => (
                                                                         <TextField

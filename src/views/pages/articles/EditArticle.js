@@ -118,7 +118,6 @@ const EditArticle = () => {
                             error={errors?.nom_article ? true : false}
                             helperText={errors?.nom_article}
                         />
-
                         <TextField
                             id="outlined"
                             label="reference"
@@ -159,7 +158,6 @@ const EditArticle = () => {
                             error={errors?.prix ? true : false}
                             helperText={errors?.prix}
                         />
-
                         <Button
                             variant="outlined"
                             sx={{ margin: 1, color: '#673AB7', backgroundColor: '#EDE7F6' }}
