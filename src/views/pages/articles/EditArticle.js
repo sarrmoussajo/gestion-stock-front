@@ -17,6 +17,7 @@ const EditArticle = () => {
     const [isEnabled, setEnabled] = useState(false);
     const navigate = useNavigate();
     const { user } = AuthUser();
+    const [message, setMessage] = useState({ text: '', color: '' });
 
     function handleInputChange(e) {
         const { name, value } = e.target;
@@ -42,6 +43,10 @@ const EditArticle = () => {
     }
     async function updateArticle() {
         try {
+            if (quantite_depot === '' || quantite_depot === 0) {
+                setErrors({ quantite_depot: 'La quantité est requise et doit etre différente de 0' });
+                return;
+            }
             const response = await API.put(`article`, {
                 gerant_id: user.id,
                 depot_id: user.affectation,
@@ -99,6 +104,16 @@ const EditArticle = () => {
             <Grid item xs={8}>
                 <Item elevation={0}>Modifier Article</Item>
             </Grid>
+            {message.color !== '' && (
+                <Alert
+                    severity={message.color}
+                    onClose={() => {
+                        setMessage({ text: '', color: '' });
+                    }}
+                >
+                    {message.text}
+                </Alert>
+            )}
             <MainCard sx={{ minwidth: 100, ml: '20vw', mr: '20vw' }}>
                 <Box
                     component="form"

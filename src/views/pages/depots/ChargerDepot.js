@@ -186,6 +186,7 @@ const ChargerDepot = () => {
             }
             storeArticle();
         } catch (error) {
+            navigate('/dashboard/gerant', { replace: true });
             setMessage({ text: 'Erreur lors de l\'ajout de l\'article', color: 'error' });
             console.log(error);
         }
@@ -209,14 +210,15 @@ const ChargerDepot = () => {
                         setMessage(({ text: message, color: 'success' }));
                     } else {
                         const { errors } = response.data;
-                        setErrors(errors);
+                        navigate('/dashboard/gerant', { replace: true });
+                        setMessage({ text: errors, color: 'error' });
 
                     }
                 }
             }
             addArticleDepot();
         } catch (error) {
-
+            navigate('/dashboard/gerant', { replace: true });
             setMessage({ text: "Erreur lors de l'ajout de l'article", color: 'error' });
             console.log(error);
 
@@ -230,6 +232,8 @@ const ChargerDepot = () => {
             setItems(data);
             //setStatus(status); 
         } catch (error) {
+            navigate('/dashboard/gerant', { replace: true });
+            setMessage({ text: "Erreur lors de la récupération de l'article", color: 'error' });
             console.log(error);
 
         }
@@ -245,6 +249,8 @@ const ChargerDepot = () => {
             setItemsCategorie(data);
             //setStatus(status); 
         } catch (error) {
+            navigate('/dashboard/gerant', { replace: true });
+            setMessage({ text: "Erreur lors de la récupération des categories", color: 'error' });
             console.log(error);
         }
 

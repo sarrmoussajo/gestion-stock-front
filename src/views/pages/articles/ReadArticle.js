@@ -195,14 +195,15 @@ const ReadArticle = () => {
         try {
             const response = await API.delete(`depot/article/${indexDepot}/${indexArticle}`);
             const { message, status } = response.data;
-            console.log(response.data);
             setMessage(message);
             if (status === 'success') {
                 const newDepotList = backupArticles.filter((article) => {
                     return article.article_id !== indexArticle;
                 });
                 setbackupArticles(newDepotList);
-                setArticles(newDepotList);
+                const filtered = articles.filter(article => article.article_id !== indexArticle);
+                setArticles(filtered);
+
             }
         } catch (error) {
             console.log(error);
@@ -462,6 +463,7 @@ const ReadArticle = () => {
                                                             setOpen(true);
                                                             setindexArticle(depot.article_id);
                                                             setindexDepot(depot.depot_id);
+                                                            setSelectedCategory(depot.categorie);
                                                         }}
                                                         sx={{ paddingTop: '5px' }}
                                                     >

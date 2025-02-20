@@ -13,6 +13,7 @@ import themes from 'themes';
 // project imports
 import NavigationScroll from 'layout/NavigationScroll';
 import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from 'views/pages/authentication/authentication3/AuthProvider';
 
 // ==============================|| APP ||============================== //
 
@@ -22,6 +23,7 @@ const App = () => {
     return (
         <StyledEngineProvider injectFirst>
             <ThemeProvider theme={themes(customization)}>
+
                 <CssBaseline />
                 <NavigationScroll>
                     <Routes />
