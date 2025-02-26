@@ -202,7 +202,11 @@ const ReadArticle = () => {
                 });
                 setbackupArticles(newDepotList);
                 const filtered = articles.filter(article => article.article_id !== indexArticle);
-                setArticles(filtered);
+                if (filtered.length === 0) {
+                    setArticles(backupArticles);
+                } else {
+                    setArticles(filtered);
+                }
 
             }
         } catch (error) {

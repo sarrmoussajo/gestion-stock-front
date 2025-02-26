@@ -127,7 +127,6 @@ const ChargerDepot = () => {
     }
 
     const HandleAddNewArticle = () => {
-        console.log('article', article);
         const newArticle = article.nom_article;
         const marque = article.marque;
         const reference = article.reference;
