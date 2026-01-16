@@ -233,7 +233,7 @@ const ChargerBoutique = () => {
                                                                 options={
                                                                     itemsBoutiques
                                                                         ? itemsBoutiques &&
-                                                                          itemsBoutiques?.map((option) => option.nom_boutique)
+                                                                        itemsBoutiques?.map((option) => option.nom_boutique)
                                                                         : []
                                                                 }
                                                                 onChange={(event, value) =>
@@ -258,7 +258,7 @@ const ChargerBoutique = () => {
                                                                 inputValue={formData.nom_article}
                                                                 disableClearable
                                                                 id="outlined"
-                                                                options={items ? items && items.map((option) => option.nom_article) : []}
+                                                                options={items ? items && items.map((option) => `${option.nom_article ?? ''} ${option.reference ?? ''}`.trim()) : []}
                                                                 onChange={(event, value) => {
                                                                     setFormData({
                                                                         ...formData,

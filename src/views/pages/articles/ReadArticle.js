@@ -259,6 +259,14 @@ const ReadArticle = () => {
                     quantite_boutique: quantiteRestant
                 }
             ]);
+            const filterbackupArticles = backupArticles.filter((item) => item.nom_article !== depot.nom_article);
+            setbackupArticles([
+                ...filterbackupArticles,
+                {
+                    ...depot,
+                    quantite_boutique: quantiteRestant
+                }
+            ]);
         }
     };
 
@@ -272,6 +280,7 @@ const ReadArticle = () => {
                 user_id: user.id
             });
             const { status, message } = response.data;
+            console.log(response.data);
             if (status === 'success') {
                 setMessage(message);
                 handleChangeDialog();
